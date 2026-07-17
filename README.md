@@ -77,15 +77,15 @@ UndoRedoService.commit_action("Call Object method")
 #### Native UndoRedo
 ```
 func add_list_item() -> void:
-    var list_item := Label.new()
-
-    var undo_redo_manager := EditorInterface.get_editor_undo_redo()
-    undo_redo_manager.create_action("Add list item")
-    undo_redo_manager.add_do_method(list_items_v_box_container, &"add_child", list_item, true)
-    undo_redo_manager.add_do_method(list_item, &"set_owner", self)
-    undo_redo_manager.add_do_reference(list_item)
-    undo_redo_manager.add_undo_method(list_items_v_box_container, &"remove_child", list_item)
-    undo_redo_manager.commit_action()
+	var list_item := Label.new()
+	
+	var undo_redo_manager := EditorInterface.get_editor_undo_redo()
+	undo_redo_manager.create_action("Add list item")
+	undo_redo_manager.add_do_method(list_items_v_box_container, &"add_child", list_item, true)
+	undo_redo_manager.add_do_method(list_item, &"set_owner", self)
+	undo_redo_manager.add_do_reference(list_item)
+	undo_redo_manager.add_undo_method(list_items_v_box_container, &"remove_child", list_item)
+	undo_redo_manager.commit_action()
 
 func remove_list_item(list_item: Label) -> void:
 	var undo_redo_manager := EditorInterface.get_editor_undo_redo()
@@ -101,7 +101,7 @@ func remove_list_item(list_item: Label) -> void:
 ```
 func add_list_item() -> void:
 	var list_item := Label.new()
-
+	
 	UndoRedoService.queue_do_method(list_items_v_box_container, &"add_child", list_item, true)
 	UndoRedoService.queue_do_method(list_item, &"set_owner", self)
 	UndoRedoService.queue_do_reference(list_item)
@@ -128,17 +128,17 @@ var undo_redo_action_name := "Randomize sprite color"
 		
 # Wait for an in-progress action to complete if there is one
 if undo_redo_manager.is_committing_action():
-    # Find the current mid-commit action's name. We need to get the specific UndoRedo
-    # reference to do this.
-    var undo_redo := undo_redo_manager.get_history_undo_redo(
-            undo_redo_manager.get_object_history_id(self)
-    )
-    
-    undo_redo_action_name = undo_redo.get_current_action_name()
-    
-    await undo_redo_manager.history_changed
+	# Find the current mid-commit action's name. We need to get the specific UndoRedo
+	# reference to do this.
+	var undo_redo := undo_redo_manager.get_history_undo_redo(
+			undo_redo_manager.get_object_history_id(self)
+	)
+	
+	undo_redo_action_name = undo_redo.get_current_action_name()
+	
+	await undo_redo_manager.history_changed
 else:
-    return # There wasn't a mid-commit action when we expected one, so exit early
+	return # There wasn't a mid-commit action when we expected one, so exit early
 
 var new_color := Color(randf(), randf(), randf())
 
@@ -157,7 +157,7 @@ undo_redo_manager.commit_action()
 # e.g. in response to an export variable changing in the Inspector.
 
 if not EditorUndoRedoHelper.is_valid_operation_context(is_undo_redo_reaction):
-    return
+	return
 
 var new_color := Color(randf(), randf(), randf())
 

@@ -2,3 +2,11 @@ root = true
 
 [*]
 charset = utf-8
+
+[*.gd]
+indent_style = tab
+indent_size = 4
+max_line_length = 100
+insert_final_newline = true
+trim_trailing_whitespace = true
+gdscript_formatter_indent_blank_lines = true

@@ -53,7 +53,7 @@ func _ready() -> void:
 		## autoload itself so that the script can still be parsed on exported builds.
 		_undo_redo_manager = Engine.get_singleton(&"EditorInterface").get_editor_undo_redo()
 		_undo_redo_manager.history_changed.connect(_on_editor_undo_redo_history_changed)
-
+		
 		_merged_undo_operations_clear_timer = Timer.new()
 		_merged_undo_operations_clear_timer.one_shot = true
 		add_child(_merged_undo_operations_clear_timer)
@@ -145,7 +145,7 @@ func queue_do_undo_method(
 	var do_method_args := [object, method]
 	do_method_args.append_array(do_args)
 	queue_do_method.callv(do_method_args)
-
+	
 	var undo_method_args := [object, method]
 	undo_method_args.append_array(undo_args)
 	queue_undo_method.callv(undo_method_args)
@@ -157,7 +157,7 @@ func clear_merged_undo_operations_cache() -> void:
 	_merged_undo_properties_cache.clear()
 	_merged_undo_methods_cache.clear()
 	_merged_undo_references_cache.clear()
-
+	
 	_merged_undo_operations_clear_timer.stop()
 
 
@@ -237,10 +237,10 @@ func commit_merge_action(
 			_queued_operations.duplicate(),
 	)
 	_queued_operations.clear()
-
+	
 	if _undo_redo_manager.is_committing_action():
 		await _undo_redo_manager.history_changed
-
+	
 	_merge_action_to_process.call()
 
 
@@ -267,10 +267,10 @@ func commit_action(
 			_queued_operations.duplicate(),
 	)
 	_queued_operations.clear()
-
+	
 	if _undo_redo_manager.is_committing_action():
 		await _undo_redo_manager.history_changed
-
+	
 	_standard_action_to_process.call()
 
 
@@ -305,7 +305,7 @@ func _process_undo_redo_action(
 ) -> void:
 	if operations.is_empty():
 		return
-
+	
 	# NOTE: we're assuming that only the `add_do_` and `add_undo_` functions are in our operations
 	# list, and that each one has its arguments bound already. Each of those functions has a
 	# reference object as its first parameter that we should be able to use to get the
@@ -313,24 +313,24 @@ func _process_undo_redo_action(
 	var undo_redo_for_scene: UndoRedo = _undo_redo_manager.get_history_undo_redo(
 			_undo_redo_manager.get_object_history_id(operations[0].get_bound_arguments() [0])
 	)
-
+	
 	var existing_actions_count := undo_redo_for_scene.get_history_count()
-
-
+	
+	
 	# Fulfills merge requirements 2 and 5 to the best of our abilities.
 	var is_valid_merge := (
 		merge_mode != UndoRedo.MERGE_DISABLE and existing_actions_count > 0
 		and _last_undo_redo_action_time + ACTION_MERGE_TIME_THRESHOLD_MS > Time.get_ticks_msec()
 	)
-
+	
 	# If we know a new action will be created, clear the cache so new undos will be fully supported.
 	if not is_valid_merge:
 		clear_merged_undo_operations_cache()
-
+	
 	# Create and execute the action
 	if is_editor_merge_action and is_valid_merge:
 		action_name = undo_redo_for_scene.get_current_action_name()
-
+	
 	_undo_redo_manager.create_action(
 			action_name,
 			merge_mode,
@@ -338,52 +338,48 @@ func _process_undo_redo_action(
 			backward_undo_ops,
 			mark_unsaved,
 	)
-
+	
 	for operation in operations:
 		# For standard actions, we'll use the built-in EditorUndoRedoManager handling.
 		if not is_editor_merge_action:
 			operation.call()
-
+		
 		# More complex editor merge-compatible actions go through the caching step to prevent
 		# subsequent undos of the same properties/methods/refs when they should be skipped.
 		else:
 			var args := operation.get_bound_arguments()
 			var obj: Object = args[0]
 			var operation_method_name := operation.get_method()
-
+			
 			if operation_method_name == &"add_undo_property":
 				var property: StringName = args[1]
-
+				
 				if obj not in _merged_undo_properties_cache:
 					_merged_undo_properties_cache[obj] = []
-
+				
 				if (
 					merge_skip_subsequent_undo_properties
 					and property in _merged_undo_properties_cache[obj]
 				):
 					continue
-
+				
 				_merged_undo_properties_cache[obj].append(property)
 			elif operation_method_name == &"add_undo_method":
 				var method: StringName = args[1]
-
+				
 				if obj not in _merged_undo_methods_cache:
 					_merged_undo_methods_cache[obj] = []
-
+				
 				if merge_skip_subsequent_undo_methods and method in _merged_undo_methods_cache[obj]:
 					continue
-
+				
 				_merged_undo_methods_cache[obj].append(method)
 			elif operation_method_name == &"add_undo_reference":
 				if merge_skip_subsequent_undo_references and obj in _merged_undo_references_cache:
 					continue
-
+				
 				_merged_undo_references_cache.append(obj)
-
+			
 			operation.call()
-
+	
 	_undo_redo_manager.commit_action()
-
-	# Clear the undo cache if a new non-merged action was created
-	if undo_redo_for_scene.get_history_count() != existing_actions_count:
-		clear_merged_undo_operations_cache()
