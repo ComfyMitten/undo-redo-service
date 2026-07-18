@@ -3,9 +3,9 @@
 # UndoRedo Service
 Improve your editor tooling with easier support for undo & redo operations in Godot!
 
-**UndoRedo Service** is an addon for Godot 4 that allows you to more easily take advantage of the editor's built-in UndoRedo system to save changes to editor game state as they happen. Everything happens through the [UndoRedoService](addons/undo_redo_service/undo_redo_service.gd) singleton that becomes active once the addon is installed.
-
 ![Godot Editor History Sample](/assets/EditorHistorySample.png)
+
+**UndoRedo Service** is an addon for Godot 4 that allows you to more easily take advantage of the editor's built-in UndoRedo system to save changes to editor game state right as they happen. Everything is managed through the [UndoRedoService](addons/undo_redo_service/undo_redo_service.gd) singleton that becomes active once the addon is installed.
 
 ## UndoRedoService Features
 - Provides safe access to the `EditorUndoRedoManager` singleton that won't crash your game on exported builds
@@ -25,7 +25,7 @@ You can install the addon by copying the `addons/undo_redo_service/` folder over
 ### 1. Updating an Object's property
 
 #### Native UndoRedo
-```
+```gdscript
 var undo_redo_manager := EditorInterface.get_editor_undo_redo()
 undo_redo_manager.create_action("Edit Object property")
 undo_redo_manager.add_do_property(my_object, &"my_property", new_value)
@@ -38,12 +38,12 @@ undo_redo_manager.commit_action()
 > The safe way to access this natively is via `Engine.get_singleton(&"EditorInterface").get_editor_undo_redo()`, which gets you a basic Object type with no autocompletion capabilites.
 
 #### With UndoRedoService
-```
+```gdscript
 UndoRedoService.queue_do_undo_property(my_object, &"my_property", new_value, old_value)
 UndoRedoService.commit_action("Edit Object Property")
 ```
 or
-```
+```gdscript
 UndoRedoService.queue_do_property(my_object, &"my_property", new_value)
 UndoRedoService.queue_undo_property(my_object, &"my_property", old_value)
 UndoRedoService.commit_action("Edit Object Property")
@@ -52,7 +52,7 @@ UndoRedoService.commit_action("Edit Object Property")
 ### 2. Calling an Object's method
 
 #### Native UndoRedo
-```
+```gdscript
 var undo_redo_manager := EditorInterface.get_editor_undo_redo()
 undo_redo_manager.create_action("Call Object method")
 undo_redo_manager.add_do_method(my_object, &"my_method", new_arg_1, new_arg_2)
@@ -61,12 +61,12 @@ undo_redo_manager.commit_action()
 ```
 
 #### With UndoRedoService
-```
+```gdscript
 UndoRedoService.queue_do_undo_method(my_object, &"my_method", [new_arg_1, new_arg_2], [old_arg_1, old_arg_2])
 UndoRedoService.commit_action("Call Object method")
 ```
 or
-```
+```gdscript
 UndoRedoService.queue_do_method(my_object, &"my_method", new_arg_1, new_arg_2)
 UndoRedoService.queue_undo_method(my_object, &"my_method", old_arg_1, old_arg_2)
 UndoRedoService.commit_action("Call Object method")
@@ -75,7 +75,7 @@ UndoRedoService.commit_action("Call Object method")
 ### 3. Adding & removing nodes
 
 #### Native UndoRedo
-```
+```gdscript
 func add_list_item() -> void:
 	var list_item := Label.new()
 	
@@ -98,7 +98,7 @@ func remove_list_item(list_item: Label) -> void:
 ```
 
 #### With UndoRedoService
-```
+```gdscript
 func add_list_item() -> void:
 	var list_item := Label.new()
 	
@@ -119,7 +119,7 @@ func remove_list_item(list_item: Label) -> void:
 ### 4. Merging a new UndoRedo action into an Editor-created action
 
 #### Native UndoRedo
-```
+```gdscript
 # Running code in response to an editor-invoked UndoRedo action,
 # e.g. in response to an export variable changing in the Inspector.
 
@@ -152,7 +152,7 @@ undo_redo_manager.commit_action()
 > See our [UndoRedo Tooling Demo - Tool V7](https://github.com/ComfyMitten/godot-undo-redo-tooling-demo/blob/main/tool_scenes/tool_v7/tool_v7.gd) for a deeper look into why this fails and how to (mostly) work around it.
 
 #### With UndoRedoService
-```
+```gdscript
 # Running code in response to an editor-invoked UndoRedo action,
 # e.g. in response to an export variable changing in the Inspector.
 
