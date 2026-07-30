@@ -1,0 +1,81 @@
+[gd_scene load_steps=4 format=3 uid="uid://cv7j0fd5v5ro1"]
+
+[ext_resource type="Script" uid="uid://chy7op2dpi7kw" path="res://UndoRedoDemo.cs" id="1_ewjow"]
+[ext_resource type="Texture2D" uid="uid://degiwqhx1m53r" path="res://assets/UndoRedoService.png" id="2_wht6i"]
+[ext_resource type="FontFile" uid="uid://bcgkl233t6pag" path="res://assets/LilitaOne-Regular.ttf" id="3_0ld81"]
+
+[node name="UndoRedoDemo" type="MarginContainer" node_paths=PackedStringArray("ListContainer")]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+script = ExtResource("1_ewjow")
+ListContainer = NodePath("HBoxContainer/ListVBoxContainer/ListItemsVBoxContainer")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 60
+
+[node name="ListVBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="HBoxContainer/ListVBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "List Items"
+
+[node name="ListItemsVBoxContainer" type="VBoxContainer" parent="HBoxContainer/ListVBoxContainer"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+size_flags_horizontal = 8
+theme_override_constants/separation = 10
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_horizontal = 8
+size_flags_vertical = 0
+
+[node name="UndoRedoServiceTextureRect" type="TextureRect" parent="VBoxContainer/HBoxContainer"]
+custom_minimum_size = Vector2(64, 64)
+layout_mode = 2
+texture = ExtResource("2_wht6i")
+expand_mode = 3
+stretch_mode = 4
+
+[node name="UndoRedoServiceLabel" type="Label" parent="VBoxContainer/HBoxContainer"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.32941177, 0.7019608, 1, 1)
+theme_override_fonts/font = ExtResource("3_0ld81")
+theme_override_font_sizes/font_size = 42
+text = "UndoRedo Service"
+
+[node name="UndoRedoServiceDemoRichTextLabel" type="RichTextLabel" parent="VBoxContainer/HBoxContainer"]
+layout_mode = 2
+theme_override_colors/default_color = Color(0.8784314, 0.8784314, 0.8784314, 1)
+theme_override_fonts/normal_font = ExtResource("3_0ld81")
+theme_override_font_sizes/normal_font_size = 42
+bbcode_enabled = true
+text = "[color=#54b3ff]UndoRedo Service[/color] demo"
+fit_content = true
+autowrap_mode = 0
+vertical_alignment = 1
+
+[node name="DemoDescriptionLabel" type="Label" parent="VBoxContainer"]
+custom_minimum_size = Vector2(100, 20)
+layout_mode = 2
+theme_override_constants/paragraph_spacing = 10
+text = "Use the tool buttons and export vars on the root UndoRedoDemo node to see the UndoRedoService in action!
+Note how every list change results in a new UndoRedo action that can be undone and redone (visible in the History tab).
+This demo only works in the editor."
+horizontal_alignment = 1
+autowrap_mode = 3
