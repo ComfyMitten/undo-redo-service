@@ -252,7 +252,8 @@ func randomize_list_item_colors() -> void:
 ## Clears the UndoRedo history, preventing further undos/redos of committed actions, and freeing
 ## references to objects referenced by those actions. Here, we also print out the new orphan node
 ## count before and after the clear happens so you can see the effects of `queue_do_reference()` and
-## `queue_undo_reference()` freeing the orphaned Label nodes that would otherwise cause memory leaks.
+## `queue_undo_reference()` freeing the orphaned Label nodes that would otherwise cause memory
+## leaks.
 func clear_undo_redo_history() -> void:
 	var orphan_nodes_before_history_clear := int(
 			Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)
