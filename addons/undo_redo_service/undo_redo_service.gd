@@ -11,6 +11,22 @@ extends Node
 ## with tweaks applied to the `editor_undo_redo_manager.cpp` and `undo_redo.cpp` C++ files for more
 ## direct, more efficient, and most importantly, more reliable behaviors to achieve the same result.
 
+## Mirror's EditorUndoRedoManager's `history_changed` signal, emitted whenever an action is commited
+## or the undo/redo history is cleared.
+signal history_changed
+
+## Mirror's EditorUndoRedoManager's `version_changed` signal, emitted during undos & redos.
+signal version_changed
+
+## Mirror's EditorUndoRedoManager's `SpecialHistory` enum used to designate unique ids for UndoRedo
+## history instances other than the standard per-editor-scene histories.
+## These can be used with `get_history_undo_redo()` for special use cases.
+enum SpecialHistory {
+	GLOBAL_HISTORY = 0,
+	REMOTE_HISTORY = -9,
+	INVALID_HISTORY = -99
+}
+
 ## How long we can wait after an UndoRedo action is applied before the next one will become
 ## un-mergable, according to one of the hidden conditions of UndoRedo's `create_action()`.
 const ACTION_MERGE_TIME_THRESHOLD_MS = 800
@@ -53,6 +69,7 @@ func _ready() -> void:
 		## autoload itself so that the script can still be parsed on exported builds.
 		_undo_redo_manager = Engine.get_singleton(&"EditorInterface").get_editor_undo_redo()
 		_undo_redo_manager.history_changed.connect(_on_editor_undo_redo_history_changed)
+		_undo_redo_manager.version_changed.connect(version_changed.emit)
 		
 		_merged_undo_operations_clear_timer = Timer.new()
 		_merged_undo_operations_clear_timer.one_shot = true
@@ -62,6 +79,7 @@ func _ready() -> void:
 
 func _on_editor_undo_redo_history_changed() -> void:
 	_last_undo_redo_action_time = Time.get_ticks_msec()
+	history_changed.emit()
 
 
 ## In most cases, the only time it's not valid to run operations is when we're in the editor and an

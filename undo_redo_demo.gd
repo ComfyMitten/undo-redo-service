@@ -76,13 +76,84 @@ extends Node
 		)
 		UndoRedoService.commit_merge_action("Update first list item's number")
 
+## This is a more advanced version of the previous export var (update_first_item_number_input); the
+## only functional difference is that instead of updating the item once with the new number, we
+## sequentially update the item 3 times while still merging into the same UndoRedo action.
+## The end result will be the number repeated 3 times in a row, like `111` for the input `1`.
+## This simulates more advanced use cases of UndoRedo where you may want to make multiple changes to
+## the same value from multiple sources that could trigger simultaneously.
+##
+## Use case example:
+## - You shift-select 3 nodes in the scene tree, each with the same script + exposed @export var.
+## - Each export var is configured to update a shared dictionary with its own unique key + value.
+## - You update all 3 nodes' export var with a new value in the inspector simultaneously.
+##
+## In this described example, if you simply queue up property changes to replace the old dictionary
+## with a new one each time, each dictionary wouldn't contain the other nodes' keys + values, so you
+## would be left with an incomplete version after the final one is committed.
+## So instead, here we need to wait for each previous commit to finish so our changes can be applied
+## sequentially. See `_on_sequential_numbers_input_changed()` to see this in effect.
+@export var update_first_item_with_multiple_sequential_numbers_input := 0:
+	set(value):
+		update_first_item_with_multiple_sequential_numbers_input = value
+		_on_sequential_numbers_input_changed(true)
+		_on_sequential_numbers_input_changed(false)
+		_on_sequential_numbers_input_changed(false)
+
 @onready var list_items_v_box_container: VBoxContainer = %ListItemsVBoxContainer
 
+var _editor_toaster: Object ## Reference to the EditorToaster instance for in-editor messages
 var _last_orphan_node_count := 0
 
 
 func _ready() -> void:
+	if not Engine.is_editor_hint():
+		return
+	
+	_editor_toaster = Engine.get_singleton(&"EditorInterface").get_editor_toaster()
 	_last_orphan_node_count = int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT))
+	UndoRedoService.history_changed.connect(_on_undo_redo_history_changed)
+	UndoRedoService.version_changed.connect(_on_undo_redo_version_changed)
+
+
+func _on_undo_redo_history_changed() -> void:
+	_editor_toaster.push_toast(
+		"UndoRedo history changed! (new action was committed or the history was cleared)"
+	)
+
+
+func _on_undo_redo_version_changed() -> void:
+	_editor_toaster.push_toast("UndoRedo version changed! (undo or redo was applied)")
+
+
+func _on_sequential_numbers_input_changed(clear_old_label: bool) -> void:
+	# Don't create an UndoRedo action if the scene hasn't fully loaded yet.
+	if not is_inside_tree():
+		return
+	# Only add custom UndoRedo operations if this code isn't running because of an undo or redo
+	# event; see the function's doc comments for details.
+	if not UndoRedoService.is_valid_operation_context(true):
+		return
+	
+	# IMPORTANT: we need to await the currently mid-commit UndoRedo action so our changes get
+	# applied sequentially instead of potentially replacing each other.
+	await UndoRedoService.history_changed
+	
+	var list_items := list_items_v_box_container.get_children()
+	if list_items.is_empty():
+		return
+	
+	var list_item: Label = list_items[0]
+	var new_label_text := "List Item " if clear_old_label else list_item.text
+	new_label_text += str(update_first_item_with_multiple_sequential_numbers_input)
+	
+	UndoRedoService.queue_do_undo_property(
+			list_item,
+			&"text",
+			new_label_text,
+			list_item.text,
+	)
+	UndoRedoService.commit_merge_action("Update first list item's number sequentially")
 
 
 ## Add a new Label node to the container. Uses `queue_do_method()` to add the node to the scene

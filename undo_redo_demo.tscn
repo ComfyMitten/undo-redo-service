@@ -75,6 +75,7 @@ layout_mode = 2
 theme_override_constants/paragraph_spacing = 10
 text = "Use the tool buttons and export vars on the root UndoRedoDemo node to see the UndoRedoService in action!
 Note how every list change results in a new UndoRedo action that can be undone and redone (visible in the History tab).
+New actions, history clears, and undos/redos should result in toast message popups in the editor as a result of the `history_changed` and `version_changed` signals firing.
 This demo only works in the editor."
 horizontal_alignment = 1
 autowrap_mode = 3
