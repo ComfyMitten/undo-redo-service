@@ -1,6 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace UndoRedoDemo;
 
@@ -9,9 +10,6 @@ using UndoRedoService = UndoRedoService.UndoRedoService;
 [Tool]
 public partial class UndoRedoDemo : Node
 {
-    [Export]
-    public VBoxContainer ListContainer { get; set; }
-
     [ExportToolButton("Add list item")]
     public Callable AddListItemButton => Callable.From(AddListItem);
 
@@ -21,6 +19,9 @@ public partial class UndoRedoDemo : Node
     [ExportToolButton("Randomize item numbers")]
     public Callable RandomizeNumbersButton => Callable.From(RandomizeListItemNumbers);
 
+    [ExportToolButton("Swap first two item numbers")]
+    public Callable SwapFirstTwoItemNumbersButton => Callable.From(SwapFirstTwoItemNumbers);
+
     [ExportToolButton("Randomize item colors")]
     public Callable RandomizeColorsButton => Callable.From(RandomizeListItemColors);
 
@@ -28,36 +29,37 @@ public partial class UndoRedoDemo : Node
     public Callable ClearHistoryButton => Callable.From(ClearHistory);
 
     private long _lastOrphanNodeCount;
+    private VBoxContainer _listContainer;
 
     public override void _Ready()
     {
+        _listContainer = GetNode<VBoxContainer>("%ListItemsVBoxContainer");
         _lastOrphanNodeCount = (long)Performance.GetMonitor(Performance.Monitor.ObjectOrphanNodeCount);
     }
 
     private void AddListItem()
     {
-        if (ListContainer == null)
+        if (_listContainer == null)
             return;
 
         var label = new Label
         {
-            Text = $"List Item {ListContainer.GetChildCount() + 1}"
+            Text = $"List Item {_listContainer.GetChildCount() + 1}"
         };
 
-        UndoRedoService.QueueDoMethod(ListContainer, "add_child", label);
+        UndoRedoService.QueueDoMethod(_listContainer, "add_child", label);
         UndoRedoService.QueueDoMethod(label, "set_owner", this);
         UndoRedoService.QueueDoReference(label);
-        UndoRedoService.QueueUndoMethod(ListContainer, "remove_child", label);
+        UndoRedoService.QueueUndoMethod(_listContainer, "remove_child", label);
         UndoRedoService.CommitAction("Add list item");
     }
 
-
     private void RemoveListItem()
     {
-        if (ListContainer == null)
+        if (_listContainer == null)
             return;
 
-        var items = ListContainer.GetChildren()
+        var items = _listContainer.GetChildren()
             .OfType<Label>()
             .ToList();
 
@@ -66,8 +68,8 @@ public partial class UndoRedoDemo : Node
 
         var label = items[^1];
 
-        UndoRedoService.QueueDoMethod(ListContainer, "remove_child", label);
-        UndoRedoService.QueueUndoMethod(ListContainer, "add_child", label);
+        UndoRedoService.QueueDoMethod(_listContainer, "remove_child", label);
+        UndoRedoService.QueueUndoMethod(_listContainer, "add_child", label);
         UndoRedoService.QueueUndoMethod(label, "set_owner", this);
         UndoRedoService.QueueUndoReference(label);
         UndoRedoService.CommitAction("Remove list item");
@@ -76,10 +78,10 @@ public partial class UndoRedoDemo : Node
 
     private void RandomizeListItemNumbers()
     {
-        if (ListContainer == null)
+        if (_listContainer == null)
             return;
 
-        var items = ListContainer.GetChildren()
+        var items = _listContainer.GetChildren()
             .OfType<Label>()
             .ToList();
 
@@ -102,13 +104,30 @@ public partial class UndoRedoDemo : Node
         UndoRedoService.CommitAction("Randomize item numbers");
     }
 
+    private void SwapFirstTwoItemNumbers()
+    {
+        if (_listContainer == null)
+            return;
+
+        var items = _listContainer.GetChildren().OfType<Label>().ToList();
+
+        if (items.Count() < 2) return;
+
+        var label1 = items[0];
+        var label2 = items[1];
+
+        UndoRedoService.QueueDoUndoProperty(label1, "text", label2.Text, label1.Text);
+        UndoRedoService.QueueDoUndoProperty(label2, "text", label1.Text, label2.Text);
+        UndoRedoService.CommitAction("Swao first two item numbers");
+    }
+
 
     private void RandomizeListItemColors()
     {
-        if (ListContainer == null)
+        if (_listContainer == null)
             return;
 
-        foreach (var label in ListContainer.GetChildren().OfType<Label>())
+        foreach (var label in _listContainer.GetChildren().OfType<Label>())
         {
             UndoRedoService.QueueDoUndoMethod(
                 label,

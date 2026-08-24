@@ -1,10 +1,10 @@
-[gd_scene load_steps=4 format=3 uid="uid://cv7j0fd5v5ro1"]
+[gd_scene format=3 uid="uid://cv7j0fd5v5ro1"]
 
 [ext_resource type="Script" uid="uid://chy7op2dpi7kw" path="res://UndoRedoDemo.cs" id="1_ewjow"]
 [ext_resource type="Texture2D" uid="uid://degiwqhx1m53r" path="res://assets/UndoRedoService.png" id="2_wht6i"]
 [ext_resource type="FontFile" uid="uid://bcgkl233t6pag" path="res://assets/LilitaOne-Regular.ttf" id="3_0ld81"]
 
-[node name="UndoRedoDemo" type="MarginContainer" node_paths=PackedStringArray("ListContainer")]
+[node name="UndoRedoDemo" type="MarginContainer" unique_id=1559922308]
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -15,43 +15,42 @@ theme_override_constants/margin_top = 20
 theme_override_constants/margin_right = 20
 theme_override_constants/margin_bottom = 20
 script = ExtResource("1_ewjow")
-ListContainer = NodePath("HBoxContainer/ListVBoxContainer/ListItemsVBoxContainer")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="."]
+[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=720218968]
 layout_mode = 2
 theme_override_constants/separation = 60
 
-[node name="ListVBoxContainer" type="VBoxContainer" parent="HBoxContainer"]
+[node name="ListVBoxContainer" type="VBoxContainer" parent="HBoxContainer" unique_id=387129341]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="HBoxContainer/ListVBoxContainer"]
+[node name="Label" type="Label" parent="HBoxContainer/ListVBoxContainer" unique_id=1843628679]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
 text = "List Items"
 
-[node name="ListItemsVBoxContainer" type="VBoxContainer" parent="HBoxContainer/ListVBoxContainer"]
+[node name="ListItemsVBoxContainer" type="VBoxContainer" parent="HBoxContainer/ListVBoxContainer" unique_id=1311091390]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 0
 
-[node name="VBoxContainer" type="VBoxContainer" parent="."]
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=213080956]
 layout_mode = 2
 size_flags_horizontal = 8
 theme_override_constants/separation = 10
 
-[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=1599108443]
 layout_mode = 2
 size_flags_horizontal = 8
 size_flags_vertical = 0
 
-[node name="UndoRedoServiceTextureRect" type="TextureRect" parent="VBoxContainer/HBoxContainer"]
+[node name="UndoRedoServiceTextureRect" type="TextureRect" parent="VBoxContainer/HBoxContainer" unique_id=1454551902]
 custom_minimum_size = Vector2(64, 64)
 layout_mode = 2
 texture = ExtResource("2_wht6i")
 expand_mode = 3
 stretch_mode = 4
 
-[node name="UndoRedoServiceLabel" type="Label" parent="VBoxContainer/HBoxContainer"]
+[node name="UndoRedoServiceLabel" type="Label" parent="VBoxContainer/HBoxContainer" unique_id=327227216]
 visible = false
 layout_mode = 2
 theme_override_colors/font_color = Color(0.32941177, 0.7019608, 1, 1)
@@ -59,7 +58,7 @@ theme_override_fonts/font = ExtResource("3_0ld81")
 theme_override_font_sizes/font_size = 42
 text = "UndoRedo Service"
 
-[node name="UndoRedoServiceDemoRichTextLabel" type="RichTextLabel" parent="VBoxContainer/HBoxContainer"]
+[node name="UndoRedoServiceDemoRichTextLabel" type="RichTextLabel" parent="VBoxContainer/HBoxContainer" unique_id=226151732]
 layout_mode = 2
 theme_override_colors/default_color = Color(0.8784314, 0.8784314, 0.8784314, 1)
 theme_override_fonts/normal_font = ExtResource("3_0ld81")
@@ -70,7 +69,7 @@ fit_content = true
 autowrap_mode = 0
 vertical_alignment = 1
 
-[node name="DemoDescriptionLabel" type="Label" parent="VBoxContainer"]
+[node name="DemoDescriptionLabel" type="Label" parent="VBoxContainer" unique_id=1668980915]
 custom_minimum_size = Vector2(100, 20)
 layout_mode = 2
 theme_override_constants/paragraph_spacing = 10
