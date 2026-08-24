@@ -1,4 +1,5 @@
 using Godot;
+using System;
 
 namespace UndoRedoService;
 
@@ -13,6 +14,48 @@ public class UndoRedoService
         _instance ??= ((SceneTree)Engine.GetMainLoop())
             .Root
             .GetNode<Node>("UndoRedoService");
+
+#region signal helpers
+    public static void ConnectHistoryChanged(Action action)
+    {
+        Instance.Connect(HistoryChangedSignalName, Callable.From(action));
+    }
+
+    public static void DisconnectHistoryChanged(Action action)
+    {
+        Instance.Disconnect(HistoryChangedSignalName, Callable.From(action));
+    }
+
+    public static void ConnectVersionChanged(Action action)
+    {
+        Instance.Connect(VersionChangedSignalName, Callable.From(action));
+    }
+
+    public static void DisconnectVersionChanged(Action action)
+    {
+        Instance.Disconnect(VersionChangedSignalName, Callable.From(action));
+    }
+
+    public static void ConnectHistoryChanged(Callable callable)
+    {
+        Instance.Connect(HistoryChangedSignalName, callable);
+    }
+
+    public static void DisconnectHistoryChanged(Callable callable)
+    {
+        Instance.Disconnect(HistoryChangedSignalName, callable);
+    }
+
+    public static void ConnectVersionChanged(Callable callable)
+    {
+        Instance.Connect(VersionChangedSignalName, callable);
+    }
+
+    public static void DisconnectVersionChanged(Callable callable)
+    {
+        Instance.Disconnect(VersionChangedSignalName, callable);
+    }
+#endregion
 
     /// <summary>
     /// <para>

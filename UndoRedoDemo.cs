@@ -93,6 +93,16 @@ public partial class UndoRedoDemo : Node
         if (!Engine.IsEditorHint()) return;
 
         _editorToaster = EditorInterface.Singleton.GetEditorToaster();
+
+        UndoRedoService.ConnectHistoryChanged(OnUndoRedoHistoryChanged);
+        UndoRedoService.ConnectVersionChanged(OnUndoRedoVersionChanged);
+    }
+
+    public override void _ExitTree()
+    {
+        UndoRedoService.DisconnectHistoryChanged(OnUndoRedoHistoryChanged);
+        UndoRedoService.DisconnectVersionChanged(OnUndoRedoVersionChanged);
+        base._ExitTree();
     }
 
     private void OnUndoRedoHistoryChanged()
