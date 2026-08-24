@@ -1,11 +1,12 @@
 using Godot;
-using System.Linq;
-using static Godot.UndoRedo;
 
 namespace UndoRedoService;
 
 public class UndoRedoService
 {
+    public readonly static string HistoryChangedSignalName = "history_changed";
+    public readonly static string VersionChangedSignalName = "version_changed";
+
     private static Node? _instance;
 
     public static Node Instance =>

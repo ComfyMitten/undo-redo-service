@@ -1,7 +1,6 @@
 using Godot;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace UndoRedoDemo;
 
@@ -28,6 +27,62 @@ public partial class UndoRedoDemo : Node
     [ExportToolButton("Clear UndoRedo history")]
     public Callable ClearHistoryButton => Callable.From(ClearHistory);
 
+    private int _updateFirstItemNumberInput;
+
+    [Export]
+    public int UpdateFirstItemNumberInput
+    {
+        get => _updateFirstItemNumberInput;
+        set
+        {
+            _updateFirstItemNumberInput = value;
+
+            if (!IsInsideTree())
+                return;
+
+            if (!UndoRedoService.IsValidOperationContext(true))
+                return;
+
+            var items = _listContainer.GetChildren()
+                .OfType<Label>()
+                .ToList();
+
+            if (items.Count == 0)
+                return;
+
+            var item = items[0];
+
+            UndoRedoService.QueueDoUndoProperty(
+                item,
+                "text",
+                $"List Item {value}",
+                item.Text
+            );
+
+            UndoRedoService.CommitMergeAction(
+                "Update first list item's number"
+            );
+        }
+    }
+
+    private int _updateFirstItemWithMultipleSequentialNumbersInput;
+
+    [Export]
+    public int UpdateFirstItemWithMultipleSequentialNumbersInput
+    {
+        get => _updateFirstItemWithMultipleSequentialNumbersInput;
+        set
+        {
+            _updateFirstItemWithMultipleSequentialNumbersInput = value;
+
+            OnSequentialNumbersInputChanged(true);
+            OnSequentialNumbersInputChanged(false);
+            OnSequentialNumbersInputChanged(false);
+        }
+    }
+
+    private EditorToaster _editorToaster;
+
     private long _lastOrphanNodeCount;
     private VBoxContainer _listContainer;
 
@@ -35,6 +90,47 @@ public partial class UndoRedoDemo : Node
     {
         _listContainer = GetNode<VBoxContainer>("%ListItemsVBoxContainer");
         _lastOrphanNodeCount = (long)Performance.GetMonitor(Performance.Monitor.ObjectOrphanNodeCount);
+        if (!Engine.IsEditorHint()) return;
+
+        _editorToaster = EditorInterface.Singleton.GetEditorToaster();
+    }
+
+    private void OnUndoRedoHistoryChanged()
+    {
+        _editorToaster.PushToast("UndoRedo history changed! (new action was committed or the history was cleared)");
+    }
+
+    private void OnUndoRedoVersionChanged()
+    {
+        _editorToaster.PushToast("UndoRedo version changed! (undo or redo was applied)");
+    }
+
+    private async void OnSequentialNumbersInputChanged(bool clearOldLabel)
+    {
+        if (!IsInsideTree()) return;
+
+        if (!UndoRedoService.IsValidOperationContext(true)) return;
+
+        await ToSignal(
+            UndoRedoService.Instance,
+            UndoRedoService.HistoryChangedSignalName
+        );
+
+        var items = _listContainer.GetChildren()
+            .OfType<Label>()
+            .ToList();
+
+        if (items.Count == 0)
+            return;
+
+        var item = items.First();
+        var newLabelText = clearOldLabel
+            ? "List Item "
+            : item.Text;
+        newLabelText += UpdateFirstItemWithMultipleSequentialNumbersInput.ToString();
+
+        UndoRedoService.QueueDoUndoProperty(item, "text", newLabelText, item.Text);
+        UndoRedoService.CommitMergeAction("Update first list item's number sequentially");
     }
 
     private void AddListItem()
@@ -47,7 +143,7 @@ public partial class UndoRedoDemo : Node
             Text = $"List Item {_listContainer.GetChildCount() + 1}"
         };
 
-        UndoRedoService.QueueDoMethod(_listContainer, "add_child", label);
+        UndoRedoService.QueueDoMethod(_listContainer, "add_child", label, true);
         UndoRedoService.QueueDoMethod(label, "set_owner", this);
         UndoRedoService.QueueDoReference(label);
         UndoRedoService.QueueUndoMethod(_listContainer, "remove_child", label);
@@ -111,14 +207,14 @@ public partial class UndoRedoDemo : Node
 
         var items = _listContainer.GetChildren().OfType<Label>().ToList();
 
-        if (items.Count() < 2) return;
+        if (items.Count < 2) return;
 
         var label1 = items[0];
         var label2 = items[1];
 
         UndoRedoService.QueueDoUndoProperty(label1, "text", label2.Text, label1.Text);
         UndoRedoService.QueueDoUndoProperty(label2, "text", label1.Text, label2.Text);
-        UndoRedoService.CommitAction("Swao first two item numbers");
+        UndoRedoService.CommitAction("Swap first two item numbers");
     }
 
 
