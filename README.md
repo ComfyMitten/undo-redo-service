@@ -14,6 +14,8 @@ Improve your editor tooling with easier support for undo & redo operations in Go
 - Merge UndoRedo actions together with `commit_merge_action`, allowing you to treat multiple undo/redo actions as one
 - Safely apply queued operations without causing errors due to other unfinished `UndoRedo` actions
 - Make & merge custom actions in response to native `UndoRedo` actions
+- Includes a custom C# wrapper to simplify usage of the service in C# projects
+- Provides GDScript & C# demo scenes that showcase how to use service in depth
 
 ## Installation
 You can install the addon by copying the `addons/undo_redo_service/` folder over to your project's `addons/` directory, and enabling it in the Project Settings -> Plugins tab.
@@ -181,7 +183,10 @@ The good news is that the native UndoRedo system is not actually that complicate
 
 If you encounter a bug with this tool, please report it by creating an Issue if one doesn't already exist for it! Make sure to describe bugs with sufficient detail, and ideally, include an explanation of how to reproduce them reliably.
 
-We are open to taking in code contributions for bug fixes, and potentially even feature additions, but any new features must align well with the current goal and scope of this tool. **If you have a new feature in mind, please make a proposal for it first via an Issue and make sure we agree to the proposed changes!.** Keep in mind that we're already quite happy with the current scope of this tool and may not prioritize new additions, but we will consider pull requests for accepted proposals from the community. Human-written code only, please.
+We are open to taking in code contributions for bug fixes, and potentially even feature additions, but any new features should align well with the current goal and scope of this tool. **If you have a new feature in mind, please make a proposal for it first via an Issue and make sure we agree to the proposed changes!.** Keep in mind that we're already quite happy with the current scope of this tool and may not prioritize new additions, but we will consider pull requests for accepted proposals from the community. Human-written code only, please.
+
+> [!NOTE]
+> This project supports a C# wrapper, and as such the C# version of Godot is recommended, but not required. When opening the project in a non-C# version of Godot, it is safe to ignore the benign "This project uses C#" warning" that pops up in the project browser. Just be sure not to commit the `project.godot` settings change that the Engine will try to make to disable C# support.
 
 ## License
 
