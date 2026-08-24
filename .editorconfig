@@ -2,11 +2,17 @@ root = true
 
 [*]
 charset = utf-8
+insert_final_newline = true
+trim_trailing_whitespace = true
 
 [*.gd]
 indent_style = tab
 indent_size = 4
 max_line_length = 100
-insert_final_newline = true
-trim_trailing_whitespace = true
 gdscript_formatter_indent_blank_lines = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+csharp_new_line_before_members_in_types = true
+dotnet_style_qualification_for_field = false
