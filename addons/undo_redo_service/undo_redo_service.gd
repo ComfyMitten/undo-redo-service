@@ -134,9 +134,17 @@ func is_valid_operation_context(is_undo_redo_reaction: bool) -> bool:
 	)
 
 
-## Queue a 'do' [param method] call for an [param object] with new [param args] passed in.[br]
+## Queue a 'do' [param method] call for an [param object] with new [param args] passed in. Any
+## passed arguments should match the method's signature.[br]
 ## See [method EditorUndoRedoManager.add_do_method] for details.
 func queue_do_method(object: Object, method: StringName, ... args: Array) -> void:
+	queue_do_methodv(object, method, args)
+
+
+## Queue a 'do' [param method] call for an [param object] with a new [param args] array passed in.
+## Unlike [method queue_do_method], all arguments should be contained within an array.[br]
+## See [method EditorUndoRedoManager.add_do_method] for details.
+func queue_do_methodv(object: Object, method: StringName, args: Array) -> void:
 	var do_method_args := [object, method]
 	do_method_args.append_array(args)
 	_queued_operations.append(_undo_redo_manager.add_do_method.bindv(do_method_args))
@@ -156,9 +164,17 @@ func queue_do_reference(object: Object) -> void:
 	_queued_operations.append(_undo_redo_manager.add_do_reference.bind(object))
 
 
-## Queue an 'undo' [param method] call for an [param object] with old [param args] passed in.[br]
+## Queue an 'undo' [param method] call for an [param object] with old [param args] passed in. Any
+## passed arguments should match the method's signature.[br]
 ## See [method EditorUndoRedoManager.add_undo_method] for details.
 func queue_undo_method(object: Object, method: StringName, ... args: Array) -> void:
+	queue_undo_methodv(object, method, args)
+
+
+## Queue an 'undo' [param method] call for an [param object] with an old [param args] array passed
+## in. Unlike [method queue_undo_method], all arguments should be contained within an array.[br]
+## See [method EditorUndoRedoManager.add_undo_method] for details.
+func queue_undo_methodv(object: Object, method: StringName, args: Array) -> void:
 	var undo_method_args := [object, method]
 	undo_method_args.append_array(args)
 	_queued_operations.append(_undo_redo_manager.add_undo_method.bindv(undo_method_args))
@@ -201,13 +217,8 @@ func queue_do_undo_method(
 		do_args: Array,
 		undo_args: Array,
 ) -> void:
-	var do_method_args := [object, method]
-	do_method_args.append_array(do_args)
-	queue_do_method.callv(do_method_args)
-	
-	var undo_method_args := [object, method]
-	undo_method_args.append_array(undo_args)
-	queue_undo_method.callv(undo_method_args)
+	queue_do_methodv(object, method, do_args)
+	queue_undo_methodv(object, method, undo_args)
 
 
 ## Force any newly committed actions to not skip any initial 'undo' operation steps, by clearing the
@@ -299,6 +310,7 @@ func commit_merge_action(
 		skip_subsequent_undo_properties := true,
 		skip_subsequent_undo_methods := true,
 		skip_subsequent_undo_references := true,
+		custom_context: Object = null,
 		backward_undo_ops := false,
 		mark_unsaved := true,
 ) -> void:
@@ -309,7 +321,7 @@ func commit_merge_action(
 			skip_subsequent_undo_references,
 			standalone_action_name,
 			UndoRedo.MERGE_ALL,
-			null,
+			custom_context,
 			backward_undo_ops,
 			mark_unsaved,
 			_queued_operations.duplicate(),
@@ -391,8 +403,11 @@ func _process_undo_redo_action(
 	# list, and that each one has its arguments bound already. Each of those functions has a
 	# reference object as its first parameter that we should be able to use to get the
 	# scene-specific UndoRedo for those operations, from which we can check the action history.
+	# If a `custom_context` object is provided, we use that instead.
 	var undo_redo_for_scene: UndoRedo = _undo_redo_manager.get_history_undo_redo(
-			_undo_redo_manager.get_object_history_id(operations[0].get_bound_arguments() [0])
+		_undo_redo_manager.get_object_history_id(
+			custom_context if custom_context != null else operations[0].get_bound_arguments() [0]
+		)
 	)
 	
 	var existing_actions_count := undo_redo_for_scene.get_history_count()
